@@ -381,7 +381,7 @@ if __name__ == '__main__':
     #parser.add_argument("--im_path", type=str, help="path_to_image")
     import glob
     im_path = glob.glob("./politi_test_colab/*.jpg")
-    print(txt_files)
+    #print(txt_files)
     
     #im_path= ['./images/demo.png','./images/demo.png']
     #cfg = parser.parse_args()
