@@ -379,7 +379,11 @@ if __name__ == '__main__':
     plt.switch_backend('agg')
     #parser = argparse.ArgumentParser()
     #parser.add_argument("--im_path", type=str, help="path_to_image")
-    im_path= ['./images/demo.png','./images/demo.png']
+    import glob
+    im_path = glob.glob("./politi_test_colab/*.jpg")
+    print(txt_files)
+    
+    #im_path= ['./images/demo.png','./images/demo.png']
     #cfg = parser.parse_args()
     
     #assert os.path.exists(cfg.im_path)
@@ -390,10 +394,10 @@ if __name__ == '__main__':
         ckpt_path = './ckpt/exif_final/exif_final.ckpt'
         exif_demo = Demo(ckpt_path=ckpt_path, use_gpu=0, quality=3.0, num_per_dim=30)
         print("model loaded")
-        print('Running image %s' % im_path)
+        print('Running image %s' % i)
         ms_st = time.time()
         #im_path = './images/demo.png'
-        im, res = exif_demo(i, dense=True)
+        im, res = exif_demo(i, dense=False)
         print (res.shape)
         #scipy.misc.toimage(image_array, cmin=0.0, cmax=...).save('out_demo.jpg')
         imageio.imwrite('image_name_out.png', res)
@@ -414,6 +418,6 @@ if __name__ == '__main__':
         plt.imshow(res, cmap='jet', vmin=0.0, vmax=1.0)
         import matplotlib
 
-        matplotlib.image.imsave('nuiceeeeess.png', res, cmap='jet')
+        matplotlib.image.imsave('./politi_test_colab/'+save_path, res, cmap='jet')
         plt.savefig(save_path)
         print('Result saved %s' % save_path)
