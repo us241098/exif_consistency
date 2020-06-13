@@ -289,7 +289,7 @@ def run_vote_no_threads(image, solver, exif_to_use, n_anchors=1, num_per_dim=Non
 
 class Demo():
     def __init__(self, ckpt_path='/data/scratch/minyoungg/ckpt/exif_medifor/exif_medifor.ckpt', use_gpu=0,
-                 quality=3.0, patch_size=128, num_per_dim=30):
+                 quality=3.0, patch_size=96, num_per_dim=30):
         self.quality = quality # sample ratio
         self.solver, nc, params = load_models.initialize_exif(ckpt=ckpt_path, init=False, use_gpu=use_gpu)
         params["im_size"] = patch_size
@@ -337,7 +337,7 @@ class Demo():
         for hSt in np.linspace(0, h - patch_size, num_per_dim).astype(int):
             for wSt in np.linspace(0, w - patch_size, num_per_dim).astype(int):
                 res = run_vote_no_threads(im, self.solver, None, n_anchors=1, num_per_dim=None,
-                                          patch_size=128, batch_size=64, sample_ratio=self.quality, 
+                                          patch_size=96, batch_size=64, sample_ratio=self.quality, 
                                           override_anchor=(hSt, wSt))['out']['responses'][0]
                 all_results.append(res)
                 
@@ -385,39 +385,44 @@ if __name__ == '__main__':
     
     #im_path= ['./images/demo.png','./images/demo.png']
     #cfg = parser.parse_args()
+    print("loading model")
+    ckpt_path = './ckpt/exif_final/exif_final.ckpt'
+    exif_demo = Demo(ckpt_path=ckpt_path, use_gpu=0, quality=2.0, num_per_dim=20)
+    print("model loaded")
     
     #assert os.path.exists(cfg.im_path)
+    
     for i in im_path:
-        imid = i.split('/')[-1].split('.')[0]
-        save_path = os.path.join('./images', imid + '_result.png')
-        print("loading model")
-        ckpt_path = './ckpt/exif_final/exif_final.ckpt'
-        exif_demo = Demo(ckpt_path=ckpt_path, use_gpu=0, quality=3.0, num_per_dim=30)
-        print("model loaded")
-        print('Running image %s' % i)
-        ms_st = time.time()
-        #im_path = './images/demo.png'
-        im, res = exif_demo(i, dense=False)
-        print (res.shape)
-        #scipy.misc.toimage(image_array, cmin=0.0, cmax=...).save('out_demo.jpg')
-        imageio.imwrite('image_name_out.png', res)
-        
-        print('MeanShift run time: %.3f' % (time.time() - ms_st))
-        
-        plt.subplots(figsize=(16, 8))
-        plt.subplot(1, 3, 1)
-        plt.title('Input Image')
-        plt.imshow(im)
-        plt.axis('off')
+        try:
+            imid = i.split('/')[-1].split('.')[0]
+            save_path = os.path.join('./images', imid + '_result.png')
+            print('Running image %s' % i)
+            ms_st = time.time()
+            #im_path = './images/demo.png'
+            im, res = exif_demo(i, dense=True)
+            print (res.shape)
+            #scipy.misc.toimage(image_array, cmin=0.0, cmax=...).save('out_demo.jpg')
+            imageio.imwrite('image_name_out.png', res)
+            
+            print('MeanShift run time: %.3f' % (time.time() - ms_st))
+            
+            plt.subplots(figsize=(16, 8))
+            plt.subplot(1, 3, 1)
+            plt.title('Input Image')
+            plt.imshow(im)
+            plt.axis('off')
 
-        plt.subplot(1, 3, 2)
-        plt.title('Cluster w/ MeanShift')
-        plt.axis('off')
-        if np.mean(res > 0.5) > 0.5:
-            res = 1.0 - res
-        plt.imshow(res, cmap='jet', vmin=0.0, vmax=1.0)
-        import matplotlib
+            plt.subplot(1, 3, 2)
+            plt.title('Cluster w/ MeanShift')
+            plt.axis('off')
+            if np.mean(res > 0.5) > 0.5:
+                res = 1.0 - res
+            plt.imshow(res, cmap='jet', vmin=0.0, vmax=1.0)
+            import matplotlib
 
-        matplotlib.image.imsave('./politi_test_colab/'+save_path, res, cmap='jet')
-        plt.savefig(save_path)
-        print('Result saved %s' % save_path)
+            matplotlib.image.imsave(save_path, res, cmap='jet')
+            #plt.savefig(save_path)
+            print('Result saved %s' % save_path)
+        except Exception as e:
+            print(e)
+            pass
