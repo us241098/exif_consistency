@@ -1,6 +1,3 @@
-from __future__ import print_function
-from __future__ import division
-
 import os, sys, numpy as np, ast
 import init_paths
 import load_models
@@ -337,7 +334,7 @@ class Demo():
         for hSt in np.linspace(0, h - patch_size, num_per_dim).astype(int):
             for wSt in np.linspace(0, w - patch_size, num_per_dim).astype(int):
                 res = run_vote_no_threads(im, self.solver, None, n_anchors=1, num_per_dim=None,
-                                          patch_size=128, batch_size=64, sample_ratio=self.quality, 
+                                          patch_size=128, batch_size=96, sample_ratio=self.quality, 
                                           override_anchor=(hSt, wSt))['out']['responses'][0]
                 all_results.append(res)
                 
@@ -377,14 +374,38 @@ import imageio
 
 if __name__ == '__main__':
     plt.switch_backend('agg')
-    #parser = argparse.ArgumentParser()
-    #parser.add_argument("--im_path", type=str, help="path_to_image")
     import glob
-    im_path = glob.glob("./politi_test_colab/*.jpg")
-    #print(txt_files)
+    import os
     
-    #im_path= ['./images/demo.png','./images/demo.png']
-    #cfg = parser.parse_args()
+    im_path_results=glob.glob("./images_train/*.png")
+    
+    import re
+    
+    for j in range (0, len(im_path_results)):
+      im_path_results[j] = re.sub('_result.png$', '.jpg', im_path_results[j])
+      im_path_results[j]=im_path_results[j].replace('images_train','politi_train')
+    print(len(im_path_results))
+    
+ 
+    im_path = glob.glob("./politi_train/*.jpg")
+    filepaths=set(im_path) - set(im_path_results)
+    filepaths=list(filepaths)
+        # Re-populate list with filename, size tuples
+    for i in range(len(filepaths)):
+        filepaths[i] = (filepaths[i], os.path.getsize(filepaths[i]))
+
+    # Sort list by file size
+    # If reverse=True sort from largest to smallest
+    # If reverse=False sort from smallest to largest
+    filepaths.sort(key=lambda filename: filename[1], reverse=True)
+
+    # Re-populate list with just filenames
+    for i in range(len(filepaths)):
+        filepaths[i] = filepaths[i][0]
+        
+    print(filepaths)
+    print(len(filepaths)) 
+    
     print("loading model")
     ckpt_path = './ckpt/exif_final/exif_final.ckpt'
     exif_demo = Demo(ckpt_path=ckpt_path, use_gpu=0, quality=2.0, num_per_dim=20)
@@ -392,17 +413,17 @@ if __name__ == '__main__':
     
     #assert os.path.exists(cfg.im_path)
     
-    for i in im_path:
+    for i in filepaths:
         try:
             imid = i.split('/')[-1].split('.')[0]
-            save_path = os.path.join('./images', imid + '_result.png')
+            save_path = os.path.join('./images_train', imid + '_result.png')
             print('Running image %s' % i)
             ms_st = time.time()
             #im_path = './images/demo.png'
             im, res = exif_demo(i, dense=True)
             print (res.shape)
             #scipy.misc.toimage(image_array, cmin=0.0, cmax=...).save('out_demo.jpg')
-            imageio.imwrite('image_name_out.png', res)
+            #imageio.imwrite('image_name_out.png', res)
             
             print('MeanShift run time: %.3f' % (time.time() - ms_st))
             
