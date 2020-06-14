@@ -377,17 +377,17 @@ if __name__ == '__main__':
     import glob
     import os
     
-    im_path_results=glob.glob("./images_train/*.png")
+    im_path_results=glob.glob("./fake_images_result/*.png")
     
     import re
     
     for j in range (0, len(im_path_results)):
       im_path_results[j] = re.sub('_result.png$', '.jpg', im_path_results[j])
-      im_path_results[j]=im_path_results[j].replace('images_train','politi_train')
+      im_path_results[j]=im_path_results[j].replace('fake_images_result','images')
     print(len(im_path_results))
     
  
-    im_path = glob.glob("./politi_train/*.jpg")
+    im_path = glob.glob("./images/*")
     filepaths=set(im_path) - set(im_path_results)
     filepaths=list(filepaths)
         # Re-populate list with filename, size tuples
@@ -416,7 +416,7 @@ if __name__ == '__main__':
     for i in filepaths:
         try:
             imid = i.split('/')[-1].split('.')[0]
-            save_path = os.path.join('./images_train', imid + '_result.png')
+            save_path = os.path.join('./fake_images_result', imid + '_result.png')
             print('Running image %s' % i)
             ms_st = time.time()
             #im_path = './images/demo.png'
